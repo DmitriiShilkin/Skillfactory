@@ -1,0 +1,30 @@
+{% extends 'default.html' %}
+
+{% load custom_filters %}
+
+{% block title %}
+	News
+{% endblock title %}
+
+{% block content %}
+    <h2>Все новости</h2>
+    <hr>
+	{% if news %}
+		<table>
+			<tr>
+				<th>Заголовок</th>
+				<th>Дата публикации</th>
+				<th>Превью</th>
+			</tr>
+			{% for post in news%}
+				<tr>
+					<td>{{ post.headline|censor }}</td>
+					<td>{{ post.datetime_in|date:'d.m.Y H:i' }}</td>
+					<td>{{ post.content|truncatechars:20|censor }}</td>
+				</tr>
+			{% endfor %}
+		</table>
+	{% else %}
+		<h2>Новостей нет!</h2>
+	{% endif %}	
+{% endblock content %}
