@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Sum
+from django.urls import reverse
 
 # Create your models here.
 
@@ -36,9 +37,15 @@ class Author(models.Model):
         self.author_rating = a_posts_total_rating * 3 + a_comments_total_rating + u_comments_total_rating
         self.save()
 
+    def __str__(self):
+        return str(self.user)
+
 
 class Category(models.Model):
     name = models.CharField(max_length=20, unique=True)
+
+    def __str__(self):
+        return self.name.title()
 
 
 class Post(models.Model):
@@ -63,6 +70,14 @@ class Post(models.Model):
 
     def preview(self):
         return self.content[:123] + '...'
+
+    # def __str__(self):
+    #     return f'{self.headline.title()}: {self.content[:20]}'
+
+    # функция reverse позволяет нам указывать не путь вида /news/…, а название пути, которое мы задали в файле urls.py
+    # для аргумента name
+    def get_absolute_url(self):
+        return reverse('post_detail', args=[str(self.id)])
 
 
 class PostCategory(models.Model):

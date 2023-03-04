@@ -3,7 +3,6 @@ from django import template
 register = template.Library()
 
 FORBIDDEN_WORDS = [
-    'повод', 'этапе', 'дорожка', 'выход', 'оппозиция',
 ]
 
 

@@ -7,7 +7,7 @@
 {% endblock title %}
 
 {% block content %}
-    <h2>Все новости</h2>
+    <h2>Все новости и статьи</h2>
     <hr>
 	{% if news %}
 		<table>
@@ -18,13 +18,31 @@
 			</tr>
 			{% for post in news%}
 				<tr>
-					<td>{{ post.headline|censor }}</td>
+					<td><a href="{{ post.id }}">{{ post.headline|censor }}</a></td>
 					<td>{{ post.datetime_in|date:'d.m.Y H:i' }}</td>
 					<td>{{ post.content|truncatechars:20|censor }}</td>
 				</tr>
 			{% endfor %}
 		</table>
 	{% else %}
-		<h2>Новостей нет!</h2>
-	{% endif %}	
+		<h2>Новостей и статей нет!</h2>
+	{% endif %}
+	<!-- Добавляем пагинацию на страницу -->
+	<!-- Информация о предыдущих страницах -->
+	{% if paginator.num_pages != 1 %}
+		{% if page_obj.has_previous %}
+			<a href="?page=1">&laquo;Первая</a>
+			...
+			<a href="?page={{ page_obj.previous_page_number }}">{{ page_obj.previous_page_number }}</a>
+		{% endif %}
+		<!-- Информация о текущей странице -->
+		|{{ page_obj.number }}|
+		<!-- Информация о следующих страницах -->
+		{% if page_obj.has_next %}
+			<a href="?page={{ page_obj.next_page_number }}">{{ page_obj.next_page_number }}</a>
+			...
+			<a href="?page={{ page_obj.paginator.num_pages }}">Последняя&raquo;</a>
+		{% endif %}
+	{% endif %}
+
 {% endblock content %}

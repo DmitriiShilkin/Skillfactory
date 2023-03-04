@@ -9,6 +9,6 @@ Post
 {% block content %}
 	Дата публикации: {{ post.datetime_in|date:'d.m.Y' }}.
 	<br>
-    <h3>{{ post.headline|censor }}.</h3>
+    <h3>{{ post.headline|censor }}</h3>
 	{{ post.content|censor }}
 {% endblock content %}
