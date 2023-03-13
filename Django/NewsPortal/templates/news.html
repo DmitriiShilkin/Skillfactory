@@ -16,7 +16,7 @@
 				<th>Дата публикации</th>
 				<th>Превью</th>
 			</tr>
-			{% for post in news%}
+			{% for post in news %}
 				<tr>
 					<td><a href="{{ post.id }}">{{ post.headline|censor }}</a></td>
 					<td>{{ post.datetime_in|date:'d.m.Y H:i' }}</td>

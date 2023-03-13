@@ -38,7 +38,7 @@ class Author(models.Model):
         self.save()
 
     def __str__(self):
-        return str(self.user)
+        return self.user.username
 
 
 class Category(models.Model):

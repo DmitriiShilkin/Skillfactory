@@ -35,16 +35,48 @@
                 <div class="collapse navbar-collapse" id="navbarResponsive">
                     <ul class="navbar-nav ml-auto">
                         <li class="nav-item active">
-                            <a class="nav-link" href="#">Home
+                            <a class="nav-link" href="#">Начало
                                 <span class="sr-only">(current)</span>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="/news/">News</a>
+                            <a class="nav-link" href="/news/">Новости</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="/news/search">Search</a>
+                            <a class="nav-link" href="/news/search">Поиск</a>
                         </li>
+                        {% if request.user.is_authenticated %}
+                            {% if is_not_author %}
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/news/mkauthor/" style="position: absolute; right: 150px;">Стать автором</a>
+                                </li>
+                            {% else %}
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/news/create/">Добавить новость</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/articles/create/">Добавить статью</a>
+                                </li>
+                                {% if object.pk is not None %}
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="/news/{{ object.pk }}/edit/">Изменить новость</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="/articles/{{ object.pk }}/edit/">Изменить статью</a>
+                                    </li>
+                                {% endif %}
+                            {% endif %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="/accounts/logout" style="position: absolute; right: 90px;">Выйти</a>
+                            </li>
+                        {% else %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="/accounts/login" style="position: absolute; right: 195px;">Войти</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/accounts/signup" style="position: absolute; right: 90px;">Регистрация</a>
+                            </li>
+                        {% endif %}
                      </ul>
                 </div>
             </div>
