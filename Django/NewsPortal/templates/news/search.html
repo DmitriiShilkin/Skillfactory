@@ -25,12 +25,14 @@
 				<th>Заголовок</th>
 				<th>Дата публикации</th>
 				<th>Превью</th>
+				<th>Автор</th>
 			</tr>
-			{% for post in news%}
+			{% for pst in news %}
 				<tr>
-					<td><a href="/news/{{ post.id }}">{{ post.headline|censor }}</a></td>
-					<td>{{ post.datetime_in|date:'d.m.Y H:i' }}</td>
-					<td>{{ post.content|truncatechars:20|censor }}</td>
+					<td><a href="{% url 'post_detail' pst.id %}">{{ pst.headline|censor }}</a></td>
+					<td>{{ pst.datetime_in|date:'d.m.Y H:i' }}</td>
+					<td>{{ pst.content|truncatechars:20|censor }}</td>
+					<td>{{ pst.author }}</td>
 				</tr>
 			{% endfor %}
 		</table>

@@ -1,13 +1,12 @@
-# from django.shortcuts import render
-from django.shortcuts import redirect
+from django.shortcuts import redirect, get_object_or_404, render
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.contrib.auth.models import Group
 from django.contrib.auth.decorators import login_required
 
-from .models import Post, Author
-from .models import article, news
+from .models import Post, Author, Category
+from .models import article, news, get_current_day
 from .filters import PostFilter
 from .forms import PostForm, PostDeleteForm
 
@@ -17,7 +16,7 @@ from .forms import PostForm, PostDeleteForm
 class NewsList(ListView):
     model = Post
     ordering = '-datetime_in'
-    template_name = 'news.html'
+    template_name = 'news/news.html'
     context_object_name = 'news'
     paginate_by = 10
 
@@ -30,7 +29,7 @@ class NewsList(ListView):
 # Представление для просмотра отдельной публикации
 class PostDetail(DetailView):
     model = Post
-    template_name = 'post.html'
+    template_name = 'news/post.html'
     context_object_name = 'post'
 
     def get_context_data(self, **kwargs):
@@ -40,12 +39,9 @@ class PostDetail(DetailView):
 
 
 # Представление для поиска публикаций
-class PostSearch(ListView):
-    model = Post
-    ordering = '-datetime_in'
-    template_name = 'search.html'
+class PostSearch(NewsList):
+    template_name = 'news/search.html'
     context_object_name = 'news'
-    paginate_by = 10
     # Переопределяем функцию получения списка новостей
     def get_queryset(self):
         # Получаем обычный запрос
@@ -69,17 +65,23 @@ class PostSearch(ListView):
 class NewsCreate(PermissionRequiredMixin, CreateView):
     # Указываем нашу разработанную форму,
     form_class = PostForm
-    # модель товаров,
+    # модель новостей,
     model = Post
     # шаблон, в котором используется форма,
-    template_name = 'news_create.html'
+    template_name = 'news/news_create.html'
     # и требование права на добавление новости.
     permission_required = ('news.add_post',)
 
     def form_valid(self, form):
+        today, tomorrow = get_current_day()
+        author = Author.objects.get(user_id=self.request.user.id)
+        posts = Post.objects.filter(author_id=author.pk, datetime_in__gte=today, datetime_in__lt=tomorrow)
+        if posts.count() >= 3:
+            return redirect('/news/create/error/')
+
         post = form.save(commit=False)
         post.news_type = news
-        post.author = Author.objects.get(user_id=self.request.user.id)
+        post.author = author
         return super().form_valid(form)
 
 
@@ -87,7 +89,8 @@ class NewsCreate(PermissionRequiredMixin, CreateView):
 class NewsEdit(PermissionRequiredMixin, UpdateView):
     form_class = PostForm
     model = Post
-    template_name = 'news_edit.html'
+    template_name = 'news/news_edit.html'
+    # требование права на изменение новости
     permission_required = ('news.change_post',)
 
     def form_valid(self, form):
@@ -100,23 +103,26 @@ class NewsEdit(PermissionRequiredMixin, UpdateView):
 class NewsDelete(PermissionRequiredMixin, DeleteView):
     form_class = PostDeleteForm
     model = Post
-    template_name = 'news_delete.html'
+    template_name = 'news/news_delete.html'
+    # требование права на удаление новости
     permission_required = ('news.delete_post',)
     success_url = reverse_lazy('news_list')
 
 
 # Представление, создающее статью
 class ArticleCreate(PermissionRequiredMixin, CreateView):
-    # Указываем нашу разработанную форму,
-    form_class = PostForm
-    # модель товаров,
     model = Post
-    # шаблон, в котором используется форма,
-    template_name = 'article_create.html'
-    # и требование права на добавление статьи.
+    form_class = PostForm
+    template_name = 'news/article_create.html'
     permission_required = ('news.add_post',)
 
     def form_valid(self, form):
+        today, tomorrow = get_current_day()
+        author = Author.objects.get(user_id=self.request.user.id)
+        posts = Post.objects.filter(author_id=author.pk, datetime_in__gte=today, datetime_in__lt=tomorrow)
+        if posts.count() >= 3:
+            return redirect('/news/create/error/')
+
         post = form.save(commit=False)
         post.news_type = article
         post.author = Author.objects.get(user_id=self.request.user.id)
@@ -125,9 +131,9 @@ class ArticleCreate(PermissionRequiredMixin, CreateView):
 
 # Представление, изменяющее статью
 class ArticleEdit(PermissionRequiredMixin, UpdateView):
-    form_class = PostForm
     model = Post
-    template_name = 'article_edit.html'
+    form_class = PostForm
+    template_name = 'news/article_edit.html'
     permission_required = ('news.change_post',)
 
     def form_valid(self, form):
@@ -137,14 +143,29 @@ class ArticleEdit(PermissionRequiredMixin, UpdateView):
 
 
 # Представление, удаляющее статью
-class ArticleDelete(PermissionRequiredMixin, DeleteView):
-    form_class = PostDeleteForm
-    model = Post
-    template_name = 'article_delete.html'
-    permission_required = ('news.delete_post',)
-    success_url = reverse_lazy('news_list')
+class ArticleDelete(NewsDelete):
+    template_name = 'news/article_delete.html'
 
 
+# Представление, отображающее новости по выбранной категории
+class CategoryList(NewsList):
+    template_name = 'news/category.html'
+    context_object_name = 'category_news_list'
+
+    def get_queryset(self):
+        self.category = get_object_or_404(Category, id=self.kwargs['pk'])
+        queryset = Post.objects.filter(category=self.category)
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['is_not_author'] = not self.request.user.groups.filter(name='authors').exists()
+        context['is_not_subscriber'] = self.request.user not in self.category.subscribers.all()
+        context['category'] = self.category
+        return context
+
+
+# Представление для добавления пользователя в группу "Авторы"
 @login_required
 def make_author(request):
     user = request.user
@@ -153,3 +174,14 @@ def make_author(request):
         Author.objects.create(user=user)
         authors_group.user_set.add(user)
     return redirect('/news/')
+
+
+# Представление для подписки на выбранную категорию
+@login_required
+def subscribe(request, pk):
+    user = request.user
+    category = Category.objects.get(id=pk)
+    category.subscribers.add(user)
+    is_not_author = not request.user.groups.filter(name='authors').exists()
+    data = {'category': category, 'is_not_author': is_not_author}
+    return render(request, 'news/subscribe.html', context=data)

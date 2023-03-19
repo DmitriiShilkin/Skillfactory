@@ -1,3 +1,5 @@
+import datetime
+
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Sum
@@ -43,6 +45,7 @@ class Author(models.Model):
 
 class Category(models.Model):
     name = models.CharField(max_length=20, unique=True)
+    subscribers = models.ManyToManyField(User, blank=True, related_name='categories')
 
     def __str__(self):
         return self.name.title()
@@ -69,7 +72,7 @@ class Post(models.Model):
         self.save()
 
     def preview(self):
-        return self.content[:123] + '...'
+        return self.content[:124] + '...'
 
     # def __str__(self):
     #     return f'{self.headline.title()}: {self.content[:20]}'
@@ -102,3 +105,10 @@ class Comment(models.Model):
         else:
             self.comment_rating = 0
         self.save()
+
+
+def get_current_day():
+    now = datetime.datetime.now()
+    today = now.replace(hour=0, minute=0, second=0)
+    tomorrow = now + datetime.timedelta(days=1)
+    return today, tomorrow

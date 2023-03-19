@@ -3,24 +3,33 @@
 {% load custom_filters %}
 
 {% block title %}
-	News
+	News by Category
 {% endblock title %}
 
 {% block content %}
-    <h2>Все новости и статьи</h2>
+    <h2>Все новости и статьи в выбранной категории "{{ category }}"</h2>
     <hr>
-	{% if news %}
+	{% if is_not_subscriber %}
+		<button> <a href="{% url 'subscribe_list' category.id %}">Подписаться</a></button>
+	{% endif %}
+	{% if category %}
 		<table>
 			<tr>
 				<th>Заголовок</th>
 				<th>Дата публикации</th>
 				<th>Превью</th>
+				<th>Категория</th>
 			</tr>
-			{% for post in news %}
+			{% for pst in category_news_list %}
 				<tr>
-					<td><a href="{{ post.id }}">{{ post.headline|censor }}</a></td>
-					<td>{{ post.datetime_in|date:'d.m.Y H:i' }}</td>
-					<td>{{ post.content|truncatechars:20|censor }}</td>
+					<td><a href="{% url 'post_detail' pst.id %}">{{ pst.headline|censor }}</a></td>
+					<td>{{ pst.datetime_in|date:'d.m.Y H:i' }}</td>
+					<td>{{ pst.content|truncatechars:20|censor }}</td>
+					<td>
+						{% for cat in pst.category.all %}
+							<a href="{% url 'category_list' cat.id %}">{{ cat }}</a>
+						{% endfor %}
+					</td>
 				</tr>
 			{% endfor %}
 		</table>

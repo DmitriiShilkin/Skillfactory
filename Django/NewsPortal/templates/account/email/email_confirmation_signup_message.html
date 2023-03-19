@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Email confirmation</title>
+</head>
+<body>
+    {% load account %}
+    <h2>{{ user.username }}, спасибо за регистрацию!</h2>
+    <h3>Пожалуйста, перейдите <a href="{{ activate_url }}">по ссылке</a>, чтобы потвердить вашу электронную почту.</h3>
+</body>
+</html>

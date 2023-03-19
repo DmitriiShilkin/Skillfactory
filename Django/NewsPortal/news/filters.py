@@ -7,7 +7,7 @@ class PostFilter(FilterSet):
     # поиск по заголовку
     headline = CharFilter(label='Заголовок', lookup_expr='icontains')
     # по имени автора
-    author__user__username = CharFilter(label='Имя автора (Anton или Julia)', lookup_expr='iexact')
+    author__user__username = CharFilter(label='Имя автора', lookup_expr='iexact')
     # по дате публикации (после указываемой)
     datetime_in = DateFilter(widget=DateInput(attrs={'type': 'date'}), label='Время публикации (после)',
                              lookup_expr='date__gte')

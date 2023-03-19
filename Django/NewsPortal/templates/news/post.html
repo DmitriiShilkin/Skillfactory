@@ -7,7 +7,7 @@ Post
 {% endblock title %}
 
 {% block content %}
-	Дата публикации: {{ post.datetime_in|date:'d.m.Y' }}.
+	Дата публикации: {{ post.datetime_in|date:'d.m.Y' }}. Автор: {{ post.author }}.
 	<br>
     <h3>{{ post.headline|censor }}</h3>
 	{{ post.content|censor }}
