@@ -29,7 +29,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1']
 
 
 # Application definition
@@ -51,7 +51,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
     'sign',
-    'django_apscheduler',
+    # 'django_apscheduler',
 ]
 
 SITE_ID = 1
@@ -130,6 +130,7 @@ AUTH_PASSWORD_VALIDATORS = [
 LANGUAGE_CODE = 'ru'
 
 TIME_ZONE = 'UTC'
+# TIME_ZONE = 'Europe/Moscow'
 
 USE_I18N = True
 
@@ -171,8 +172,14 @@ EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 EMAIL_USE_SSL = True
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
 
-APSCHEDULER_DATETIME_FORMAT = 'N j, Y, f:s a'
-APSCHEDULER_RUN_NOW_TIMEOUT = 25
+# APSCHEDULER_DATETIME_FORMAT = 'N j, Y, f:s a'
+# APSCHEDULER_RUN_NOW_TIMEOUT = 25
+
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
+CELERY_RESULT_BACKEND = os.getenv('CELERY_BROKER_URL')
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
 
 # if DEBUG:
 #     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

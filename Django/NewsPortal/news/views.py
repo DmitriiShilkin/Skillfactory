@@ -9,6 +9,7 @@ from .models import Post, Author, Category
 from .models import article, news, get_current_day
 from .filters import PostFilter
 from .forms import PostForm, PostDeleteForm
+from .tasks import post_add_notification
 
 
 # Create your views here.
@@ -82,6 +83,7 @@ class NewsCreate(PermissionRequiredMixin, CreateView):
         post = form.save(commit=False)
         post.news_type = news
         post.author = author
+        post_add_notification.delay(post.pk)
         return super().form_valid(form)
 
 
@@ -125,7 +127,9 @@ class ArticleCreate(PermissionRequiredMixin, CreateView):
 
         post = form.save(commit=False)
         post.news_type = article
-        post.author = Author.objects.get(user_id=self.request.user.id)
+        post.author = author
+        post.save()
+        post_add_notification.delay(post.pk)
         return super().form_valid(form)
 
 
