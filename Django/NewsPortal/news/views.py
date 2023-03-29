@@ -4,6 +4,8 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView, D
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.contrib.auth.models import Group
 from django.contrib.auth.decorators import login_required
+# импортируем кэш
+from django.core.cache import cache
 
 from .models import Post, Author, Category
 from .models import article, news, get_current_day
@@ -32,11 +34,20 @@ class PostDetail(DetailView):
     model = Post
     template_name = 'news/post.html'
     context_object_name = 'post'
+    queryset = Post.objects.all()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['is_not_author'] = not self.request.user.groups.filter(name='authors').exists()
         return context
+
+    # переопределяем метод получения объекта
+    def get_object(self, *args, **kwargs):
+        obj = cache.get(f'post-{self.kwargs["pk"]}', None)
+        if not obj:
+            obj = super().get_object(queryset=self.queryset)
+            cache.set(f'post-{self.kwargs["pk"]}', obj)
+        return obj
 
 
 # Представление для поиска публикаций
@@ -83,8 +94,10 @@ class NewsCreate(PermissionRequiredMixin, CreateView):
         post = form.save(commit=False)
         post.news_type = news
         post.author = author
+        # вызываем метод super, чтобы у статьи появился pk
+        result = super().form_valid(form)
         post_add_notification.delay(post.pk)
-        return super().form_valid(form)
+        return result
 
 
 # Представление, изменяющее новость
@@ -128,9 +141,9 @@ class ArticleCreate(PermissionRequiredMixin, CreateView):
         post = form.save(commit=False)
         post.news_type = article
         post.author = author
-        post.save()
+        result = super().form_valid(form)
         post_add_notification.delay(post.pk)
-        return super().form_valid(form)
+        return result
 
 
 # Представление, изменяющее статью

@@ -4,6 +4,8 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Sum
 from django.urls import reverse
+# импортируем кэш
+from django.core.cache import cache
 
 # Create your models here.
 
@@ -81,6 +83,13 @@ class Post(models.Model):
     # для аргумента name
     def get_absolute_url(self):
         return reverse('post_detail', args=[str(self.id)])
+
+    # при изменении объекта будем удалять его из кэша
+    def save(self, *args, **kwargs):
+        # сначала вызываем метод родителя, чтобы объект сохранился
+        super().save(*args, *kwargs)
+        # затем удаляем его из кэша, чтобы сбросить pk
+        cache.delete(f'post-{self.pk}')
 
 
 class PostCategory(models.Model):

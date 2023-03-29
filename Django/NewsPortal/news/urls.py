@@ -1,9 +1,16 @@
 from django.urls import path
+#импорт кэширования отдельных страниц
+# from django.views.decorators.cache import cache_page
+
 from .views import (NewsList, PostDetail, PostSearch, NewsCreate, NewsEdit, NewsDelete,
                     make_author, CategoryList, subscribe)
 
 urlpatterns = [
+# добавим кэширование на список всех публикаций. Раз в 1 минуту страничка будет записываться в кэш для экономии ресурсов.
+#     path('', cache_page(60*1)(NewsList.as_view()), name='news_list'),
     path('', NewsList.as_view(), name='news_list'),
+# добавим кэширование на детальные публикации. Раз в 5 минут публикация будет записываться в кэш для экономии ресурсов.
+#     path('<int:pk>', cache_page(60*5)(PostDetail.as_view()), name='post_detail'),
     path('<int:pk>', PostDetail.as_view(), name='post_detail'),
     path('search/', PostSearch.as_view(), name='post_search'),
     path('create/', NewsCreate.as_view(), name='news_create'),
