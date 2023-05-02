@@ -119,5 +119,5 @@ class Comment(models.Model):
 def get_current_day():
     now = datetime.datetime.now()
     today = now.replace(hour=0, minute=0, second=0)
-    tomorrow = now + datetime.timedelta(days=1)
+    tomorrow = today + datetime.timedelta(days=1)
     return today, tomorrow
