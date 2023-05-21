@@ -13,7 +13,7 @@ from .models import article, news, get_current_day
 from .filters import PostFilter
 from .forms import PostForm, PostDeleteForm
 from .tasks import post_add_notification
-from .serializers import PostSerializer, CategorySerializer, AuthorSerializer
+from .serializers import PostSerializer
 
 
 # Create your views here.
@@ -209,16 +209,4 @@ def subscribe(request, pk):
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
-    permission_classes = [permissions.AllowAny]
-
-
-class CategoryViewSet(viewsets.ModelViewSet):
-    queryset = Category.objects.all()
-    serializer_class = CategorySerializer
-    permission_classes = [permissions.AllowAny]
-
-
-class AuthorViewSet(viewsets.ModelViewSet):
-    queryset = Author.objects.all()
-    serializer_class = AuthorSerializer
     permission_classes = [permissions.AllowAny]
