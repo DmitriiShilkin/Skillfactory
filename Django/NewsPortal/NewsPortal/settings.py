@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.google',
     'sign',
     # 'django_apscheduler',
+    'rest_framework',
 ]
 
 SITE_ID = 1
@@ -59,6 +60,8 @@ SITE_ID = 1
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    # включение локализации
+    # 'django.middleware.locale.LocaleMiddleware',
     # включение кэширования всего сайта
     # 'django.middleware.cache.UpdateCacheMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -311,4 +314,20 @@ LOGGING = {
             'propagate': False,
         }
     }
+}
+
+# путь к файлам локализации
+# LOCALE_PATHS = [
+#     os.path.join(BASE_DIR, 'locale')
+# ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend'
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 10,
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ]
 }

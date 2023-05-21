@@ -6,12 +6,14 @@ from django.contrib.auth.models import Group
 from django.contrib.auth.decorators import login_required
 # импортируем кэш
 from django.core.cache import cache
+from rest_framework import viewsets, permissions
 
 from .models import Post, Author, Category
 from .models import article, news, get_current_day
 from .filters import PostFilter
 from .forms import PostForm, PostDeleteForm
 from .tasks import post_add_notification
+from .serializers import PostSerializer, CategorySerializer, AuthorSerializer
 
 
 # Create your views here.
@@ -202,3 +204,21 @@ def subscribe(request, pk):
     is_not_author = not request.user.groups.filter(name='authors').exists()
     data = {'category': category, 'is_not_author': is_not_author}
     return render(request, 'news/subscribe.html', context=data)
+
+
+class PostViewSet(viewsets.ModelViewSet):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
+    permission_classes = [permissions.AllowAny]
+
+
+class CategoryViewSet(viewsets.ModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = [permissions.AllowAny]
+
+
+class AuthorViewSet(viewsets.ModelViewSet):
+    queryset = Author.objects.all()
+    serializer_class = AuthorSerializer
+    permission_classes = [permissions.AllowAny]
