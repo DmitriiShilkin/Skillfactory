@@ -1,0 +1,43 @@
+{% extends 'default.html' %}
+
+{% block title %}
+Ad
+{% endblock title %}
+
+{% block content %}
+	Дата публикации: {{ adv.created_at|date:'d.m.Y' }}. Автор: {{ adv.author }}.
+	<br>
+    <h3>{{ adv.headline }}</h3>
+	{{ adv.text|safe }}
+<hr>
+	{% if replies %}
+		{% with replies.count as total_replies %}
+    	<h2>
+        	{{ total_replies }} Откликов
+    	</h2>
+		{% endwith %}
+		{% for reply in replies %}
+    		<div class="reply">
+        		<p class="info">
+            		Отклик {{ forloop.counter }} от {{ reply.user }}
+            		создан {{ reply.created_at|date:'d.m.Y H:i' }}
+        		</p>
+        		{{ reply.text|linebreaks }}
+    		</div>
+		{% endfor %}
+	{% else %}
+		<p>Отклики отсутствуют.</p>
+	{% endif %}
+	{% if request.user.is_authenticated %}
+		{% if new_reply %}
+    		<h2>Ваш отклик добавлен и ожидает модерации.</h2>
+		{% else %}
+    		<h2>Добавьте новый отклик</h2>
+    		<form action="" method="post">
+        		{{ reply_form.as_p }}
+        		{% csrf_token %}
+        		<p><input type="submit" value="Добавить отклик"></p>
+    		</form>
+		{% endif %}
+	{% endif %}
+{% endblock content %}

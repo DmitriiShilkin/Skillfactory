@@ -1,0 +1,49 @@
+{% extends 'default.html' %}
+
+{% block title %}
+	Ads
+{% endblock title %}
+
+{% block content %}
+    <h2>Все объявления</h2>
+    <hr>
+	{% if ads %}
+		<table cellpadding="5">
+			<tr>
+				<th>Заголовок</th>
+				<th>Дата публикации</th>
+				<th>Категория</th>
+			</tr>
+			{% for ad in ads %}
+				<tr>
+					<td><a href="{% url 'adv_detail' pk=ad.pk %}">{{ ad.headline }}</a></td>
+					<td>{{ ad.created_at|date:'d.m.Y H:i' }}</td>
+					<td>{{ ad.category }}</td>
+					{% if request.user.is_authenticated and request.user == ad.author %}
+						<td><button><a href="{% url 'adv_edit' pk=ad.pk %}">Редактировать</a></button></td>
+					{% endif %}
+				</tr>
+			{% endfor %}
+		</table>
+	{% else %}
+		<h2>Объявлений нет!</h2>
+	{% endif %}
+	<!-- Добавляем пагинацию на страницу -->
+	<!-- Информация о предыдущих страницах -->
+	{% if paginator.num_pages != 1 %}
+		{% if page_obj.has_previous %}
+			<a href="?page=1">&laquo;Первая</a>
+			...
+			<a href="?page={{ page_obj.previous_page_number }}">{{ page_obj.previous_page_number }}</a>
+		{% endif %}
+		<!-- Информация о текущей странице -->
+		|{{ page_obj.number }}|
+		<!-- Информация о следующих страницах -->
+		{% if page_obj.has_next %}
+			<a href="?page={{ page_obj.next_page_number }}">{{ page_obj.next_page_number }}</a>
+			...
+			<a href="?page={{ page_obj.paginator.num_pages }}">Последняя&raquo;</a>
+		{% endif %}
+	{% endif %}
+
+{% endblock content %}
