@@ -1,71 +1,61 @@
-# from django.shortcuts import render
-import random
-
-from django.contrib.auth import authenticate, login
-# Create your views here.
-from django.contrib.auth.models import User
-from django.contrib.auth.views import LoginView
 from django.shortcuts import render, redirect
-from django.urls import reverse_lazy
+import random
+from string import hexdigits
+from django.contrib.auth.models import User
+from django.core.mail import send_mail
 from django.views.generic.edit import CreateView
-# from django.views.generic import TemplateView
-# from django.contrib.auth.mixins import LoginRequiredMixin
+from django.conf import settings
 
 from .forms import BaseRegisterForm
 from .models import OneTimeCode
 
 
-# Функция случайных номеров
-def random_str():
-    _str = '1234567890abcdefghijklmnopqrstuvwxyz'
-    return ''.join(random.choice(_str) for i in range(6))
-
-
-def email_send(request):
-    pass
-    return render(request, 'email_send.html')
-
-
+# Create your views here.
 class BaseRegisterView(CreateView):
     model = User
     form_class = BaseRegisterForm
     template_name = 'sign/signup.html'
-    success_url = reverse_lazy('login')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'] = BaseRegisterForm()
+        return context
+
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST)
+        if form.is_valid():
+            print("SIGNUP FORM IS VALID")
+            user = form.save(commit=False)
+            user.is_active = False
+            user.save()
+        else:
+            print("SIGNUP FORM IS INVALID")
+
+        return redirect('activate', request.POST['username'])
 
 
-def usual_login_view(request):
-    username = request.POST['username']
-    password = request.POST['password']
-    user = authenticate(request, username=username, password=password)
-    if user is not None:
-        OneTimeCode.objects.create(code=random_str(), user=user)
-        # email_send()
-        # перенаправить на нужную страницу
-        redirect('/login_with_code/')
-    else:
-        # вернуть сообщение об ошибке "не верный логин"
-        pass
+class ActivateView(CreateView):
+    template_name = 'sign/activate.html'
 
+    def get_context_data(self, **kwargs):
+        user_ = self.kwargs.get('user')
+        if not OneTimeCode.objects.filter(user=user_).exists():
+            code = ''.join(random.sample(hexdigits, 5))
+            OneTimeCode.objects.create(user=user_, code=code)
+            user = User.objects.get(username=user_)
+            send_mail(
+                subject='Код активации',
+                message=f'Код ативации аккаунта: {code}',
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[user.email],
+            )
 
-def login_with_code_view(request):
-    username = request.POST['username']
-    code = request.POST['code']
-    if OneTimeCode.objects.filter(code=code, user__username=username).exists():
-        login(request, username)
-    else:
-        # сообщение об ошибке
-        pass
-
-
-# def login_with_code_view(request):
-#     user = User.objects.get(pk=request.user.id)
-#     code = random_str()
-#     otc = OneTimeCode.objects.create(code=code, user=user)
-#
-#     text = '''You can enter to our secret page
-#     http://example.com/secret/page?otcode=%s
-#     without your login and password''' % code
-#
-#     user.email_user('login with one-time code', text)
-#
-#     return render(request, 'sign/login.html')
+    def post(self, request, *args, **kwargs):
+        if 'code' in request.POST:
+            user = request.path.split('/')[-1]
+            if OneTimeCode.objects.filter(code=request.POST['code'], user=user).exists():
+                User.objects.filter(username=user).update(is_active=True)
+                OneTimeCode.objects.filter(code=request.POST['code'], user=user).delete()
+            else:
+                return render(self.request, 'sign/invalid_code.html')
+        return redirect('login')

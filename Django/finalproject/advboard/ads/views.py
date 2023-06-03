@@ -106,9 +106,18 @@ def subscribe(request, pk):
     user = request.user
     category = Category.objects.get(id=pk)
     category.subscribers.add(user)
-    is_not_author = not request.user.groups.filter(name='authors').exists()
-    data = {'category': category, 'is_not_author': is_not_author}
+    data = {'category': category}
     return render(request, 'ads/subscribe.html', context=data)
+
+
+# Представление для отписки от выбранной категории
+@permission_required('ads.edit_category', raise_exception=True)
+def unsubscribe(request, pk):
+    user = request.user
+    category = Category.objects.get(id=pk)
+    category.subscribers.pop(user)
+    data = {'category': category}
+    return render(request, 'ads/unsubscribe.html', context=data)
 
 
 # Представление для просмотра откликов с фильтрацией

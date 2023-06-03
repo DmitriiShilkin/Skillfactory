@@ -14,13 +14,13 @@
 				<th>Дата публикации</th>
 				<th>Категория</th>
 			</tr>
-			{% for ad in ads %}
+			{% for adv in ads %}
 				<tr>
-					<td><a href="{% url 'adv_detail' pk=ad.pk %}">{{ ad.headline }}</a></td>
-					<td>{{ ad.created_at|date:'d.m.Y H:i' }}</td>
-					<td>{{ ad.category }}</td>
-					{% if request.user.is_authenticated and request.user == ad.author %}
-						<td><button><a href="{% url 'adv_edit' pk=ad.pk %}">Редактировать</a></button></td>
+					<td><a href="{% url 'adv_detail' pk=adv.pk %}">{{ adv.headline }}</a></td>
+					<td>{{ adv.created_at|date:'d.m.Y H:i' }}</td>
+					<td><a href="{% url 'category_list' pk=adv.category.pk %}">{{ adv.category }}</a></td>
+					{% if request.user.is_authenticated and request.user == adv.author %}
+						<td><button><a href="{% url 'adv_edit' pk=adv.pk %}">Редактировать</a></button></td>
 					{% endif %}
 				</tr>
 			{% endfor %}

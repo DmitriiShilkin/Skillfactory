@@ -1,0 +1,12 @@
+{% extends "default.html" %}
+
+{% block content %}
+	<h2>Активация аккаунта</h2>
+	<hr>
+	<form method="post" action="">
+		{% csrf_token %}
+		{{ form.as_p }}
+		<input type="text" placeholder="Введите код активации" required/>
+		<input type="submit" value="Подтвердить">
+	</form>
+{% endblock content %}

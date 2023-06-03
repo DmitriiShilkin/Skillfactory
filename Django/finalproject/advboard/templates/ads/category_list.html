@@ -1,7 +1,5 @@
 {% extends 'default.html' %}
 
-{% load custom_filters %}
-
 {% block title %}
 	Ads by Category
 {% endblock title %}
@@ -9,25 +7,25 @@
 {% block content %}
     <h2>Все объявления в выбранной категории "{{ category }}"</h2>
     <hr>
-	{% if is_not_subscriber %}
-		<button> <a href="{% url 'subscribe_list' pk=category.pk %}">Подписаться</a></button>
+	{% if request.user.is_authenticated %}
+		{% if is_not_subscriber %}
+			<button> <a href="{% url 'subscribe' pk=category.pk %}">Подписаться</a></button>
+		{% else %}
+			<button> <a href="{% url 'unsubscribe' pk=category.pk %}">Отписаться</a></button>
+		{% endif %}
 	{% endif %}
 	{% if category %}
-		<table>
+		<table cellpadding="5">
 			<tr>
 				<th>Заголовок</th>
 				<th>Дата публикации</th>
 				<th>Категория</th>
 			</tr>
-			{% for ad in category_news_list %}
+			{% for adv in category_ads_list %}
 				<tr>
-					<td><a href="{% url 'ad_detail' pk=ad.pk %}">{{ ad.headline }}</a></td>
-					<td>{{ ad.datetime_in|date:'d.m.Y H:i' }}</td>
-					<td>
-						{% for cat in ad.category.all %}
-							<a href="{% url 'category_list' pk=cat.pk %}">{{ cat }}</a>
-						{% endfor %}
-					</td>
+					<td><a href="{% url 'adv_detail' pk=adv.pk %}">{{ adv.headline }}</a></td>
+					<td>{{ adv.created_at|date:'d.m.Y H:i' }}</td>
+					<td>{{ category }}</td>
 				</tr>
 			{% endfor %}
 		</table>
