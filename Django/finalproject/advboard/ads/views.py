@@ -9,6 +9,7 @@ from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from .filters import ReplyFilter
 from .forms import AdForm, ReplyDeleteForm, ReplyForm
 from .models import Advertisement, Reply, Category
+from .tasks import adv_add_notification, reply_add_notification, reply_approve_notification
 
 
 # Представление для просмотра всех объявлений
@@ -39,6 +40,8 @@ def ad_detail_view(request, pk):
             new_reply.user = request.user
             # сохраняем отклик в БД
             new_reply.save()
+            # отправляем уведомление автору о новом отклике на его объявление
+            reply_add_notification.delay(new_reply.pk)
     else:
         reply_form = ReplyForm()
 
@@ -66,11 +69,12 @@ class AdCreateView(PermissionRequiredMixin, AccessMixin, CreateView):
 
     def form_valid(self, form):
         author = User.objects.get(id=self.request.user.id)
-        ad = form.save(commit=False)
-        ad.author = author
+        adv = form.save(commit=False)
+        adv.author = author
         # вызываем метод super, чтобы у объявления появился pk
         result = super().form_valid(form)
-        # ad_add_notification.delay(ad.pk)
+        # уведомляем подписчиков о новом объявлении в их любимой категории
+        adv_add_notification.delay(adv.pk)
         return result
 
 
@@ -101,7 +105,7 @@ class AdsListByCategoryView(AdsListView):
 
 
 # Представление для подписки на выбранную категорию
-@permission_required('ads.edit_category', raise_exception=True)
+@permission_required('ads.change_category', raise_exception=True)
 def subscribe(request, pk):
     user = request.user
     category = Category.objects.get(id=pk)
@@ -111,11 +115,11 @@ def subscribe(request, pk):
 
 
 # Представление для отписки от выбранной категории
-@permission_required('ads.edit_category', raise_exception=True)
+@permission_required('ads.change_category', raise_exception=True)
 def unsubscribe(request, pk):
     user = request.user
     category = Category.objects.get(id=pk)
-    category.subscribers.pop(user)
+    category.subscribers.remove(user)
     data = {'category': category}
     return render(request, 'ads/unsubscribe.html', context=data)
 
@@ -161,12 +165,12 @@ class ReplyDeleteView(PermissionRequiredMixin, AccessMixin, DeleteView):
 
 
 # Представление, принимающее отклик
-@permission_required('ads.edit_reply', raise_exception=True)
-def reply_approve_view(pk):
-    # user = request.user
+@permission_required('ads.change_reply', raise_exception=True)
+def reply_approve_view(request, pk):
     reply = Reply.objects.get(id=pk)
     reply.approved = True
     reply.save()
+    reply_approve_notification.delay(reply.pk)
 
     return redirect('/ads/replies/')
 

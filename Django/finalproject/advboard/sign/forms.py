@@ -16,9 +16,3 @@ class BaseRegisterForm(UserCreationForm):
                   "email",
                   "password1",
                   "password2", )
-
-    def save(self, *args, **kwargs):
-        user = super().save(*args, **kwargs)
-        common_group = Group.objects.get(name='common')
-        common_group.user_set.add(user)
-        return user

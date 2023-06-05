@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 import random
 from string import hexdigits
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.core.mail import send_mail
 from django.views.generic.edit import CreateView
 from django.conf import settings
@@ -11,6 +11,7 @@ from .models import OneTimeCode
 
 
 # Create your views here.
+# Представление для регистрации пользователя
 class BaseRegisterView(CreateView):
     model = User
     form_class = BaseRegisterForm
@@ -24,16 +25,19 @@ class BaseRegisterView(CreateView):
     def post(self, request, *args, **kwargs):
         form = self.form_class(request.POST)
         if form.is_valid():
-            print("SIGNUP FORM IS VALID")
+            # print("SIGNUP FORM IS VALID")
             user = form.save(commit=False)
             user.is_active = False
             user.save()
-        else:
-            print("SIGNUP FORM IS INVALID")
+            common_group = Group.objects.get(name='common')
+            common_group.user_set.add(user)
+        # else:
+            # print("SIGNUP FORM IS INVALID")
 
         return redirect('activate', request.POST['username'])
 
 
+# Представление для активации зарегистрированного пользователя по коду на почту
 class ActivateView(CreateView):
     template_name = 'sign/activate.html'
 
@@ -45,7 +49,7 @@ class ActivateView(CreateView):
             user = User.objects.get(username=user_)
             send_mail(
                 subject='Код активации',
-                message=f'Код ативации аккаунта: {code}',
+                message=f'Код активации аккаунта: {code}',
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 recipient_list=[user.email],
             )
