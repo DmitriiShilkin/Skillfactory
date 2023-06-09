@@ -11,6 +11,7 @@ STATUSES = [
 
 # список способов добраться
 ACTIVITIES = [
+    ('empty', ''),
     ('1', 'пешком'),
     ('2', 'лыжи'),
     ('3', 'катамаран'),
@@ -80,22 +81,22 @@ class User(models.Model):
     phone = models.CharField('Телефон', max_length=12)
     fam = models.CharField('Фамилия', max_length=64)
     name = models.CharField('Имя', max_length=64)
-    otc = models.CharField('Отчество', max_length=64, blank=True)
+    otc = models.CharField('Отчество', max_length=64, blank=True, null=True)
 
 
 # модель добавления перевала
 class Passage(models.Model):
     date_added = models.DateField(default=timezone.now, editable=False)
-    beauty_title = models.CharField('Название для рекламы', default='пер. ', max_length=255)
+    beauty_title = models.CharField('Префикс', default='пер. ', max_length=255)
     title = models.CharField('Название', max_length=255)
     other_titles = models.CharField('Другое название', max_length=255, blank=True, null=True)
     connect = models.CharField('Что связывает', max_length=255, blank=True, null=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user')
     coords = models.OneToOneField(Coords, on_delete=models.CASCADE, blank=True, null=True)
     level = models.ForeignKey(Level, on_delete=models.CASCADE, blank=True, null=True)
-    area = models.ForeignKey(Areas, on_delete=models.CASCADE)
-    status = models.CharField(max_length=8, choices=STATUSES, default='new')
-    spr_activities_types = models.CharField(max_length=2, choices=ACTIVITIES)
+    area = models.ForeignKey(Areas, on_delete=models.CASCADE, default=1)
+    status = models.CharField('Статус', max_length=8, choices=STATUSES, default='new')
+    spr_activities_types = models.CharField('На чем добраться', max_length=5, choices=ACTIVITIES, default='empty')
 
     def __str__(self):
         return f'{self.pk}: {self.beauty_title}'
