@@ -4,6 +4,7 @@ from drf_writable_nested import WritableNestedModelSerializer
 from .models import Passage, Areas, User, Level, Coords, Images
 
 
+# сериализатор вложенной модели регионов (горных систем), к которым относится перевал
 class AreasSerializer(serializers.ModelSerializer):
     title = serializers.PrimaryKeyRelatedField(queryset=Areas.objects.all(), label='Принадлежность')
 
@@ -14,6 +15,7 @@ class AreasSerializer(serializers.ModelSerializer):
         ]
 
 
+# сериализатор вложенной модели уровней сложности перевала
 class LevelSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -26,6 +28,7 @@ class LevelSerializer(serializers.ModelSerializer):
         ]
 
 
+# сериализатор вложенной модели географичеких координат перевала
 class CoordsSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -37,6 +40,7 @@ class CoordsSerializer(serializers.ModelSerializer):
         ]
 
 
+# сериализатор вложенной модели пользователя, создающего запись о перевале
 class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -65,8 +69,9 @@ class UserSerializer(serializers.ModelSerializer):
             return new_user
 
 
+# сериализатор модели фотографий, прикрепляемых к перевалу
 class ImagesSerializer(serializers.ModelSerializer):
-    img = serializers.URLField()
+    img = serializers.URLField(label='URL')
 
     class Meta:
         model = Images
@@ -76,6 +81,7 @@ class ImagesSerializer(serializers.ModelSerializer):
         ]
 
 
+# сериализатор модели самого перевала
 class PassageSerializer(WritableNestedModelSerializer):
     area = AreasSerializer()
     coords = CoordsSerializer()
@@ -85,6 +91,7 @@ class PassageSerializer(WritableNestedModelSerializer):
 
     class Meta:
         model = Passage
+        depth = 1
         fields = [
             'id',
             'beauty_title',
@@ -95,12 +102,13 @@ class PassageSerializer(WritableNestedModelSerializer):
             'coords',
             'level',
             'spr_activities_types',
-            # 'status',
+            'status',
             'images',
             'user',
          ]
 
-    def create(self, validated_data):
+    # переопределяем метод post
+    def create(self, validated_data, **kwargs):
         area = validated_data.pop('area')
         user = validated_data.pop('user')
         coords = validated_data.pop('coords')
@@ -127,21 +135,3 @@ class PassageSerializer(WritableNestedModelSerializer):
 
         return passage
 
-    def validate(self, data):
-        if self.instance is not None:
-            instance_user = self.instance.user
-            data_user = data.get('user')
-            user_fields_for_validation = [
-                instance_user.fam != data_user['fam'],
-                instance_user.name != data_user['name'],
-                instance_user.otc != data_user['otc'],
-                instance_user.phone != data_user['phone'],
-                instance_user.email != data_user['email'],
-            ]
-            if data_user is not None and any(user_fields_for_validation):
-                raise serializers.ValidationError(
-                    {
-                        'Отказано': 'Данные пользователя не могут быть изменены',
-                    }
-                )
-        return data
