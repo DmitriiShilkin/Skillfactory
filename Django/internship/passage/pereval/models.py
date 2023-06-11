@@ -11,7 +11,7 @@ STATUSES = [
 
 # список способов добраться
 ACTIVITIES = [
-    ('empty', 'Не задано'),
+    ('', 'Не задано'),
     ('1', 'пешком'),
     ('2', 'лыжи'),
     ('3', 'катамаран'),
@@ -27,7 +27,7 @@ ACTIVITIES = [
 
 # список уровней сложности
 LEVELS = [
-    ('empty', 'Не задано'),
+    ('', 'Не задано'),
     ('1a', '1А'),
     ('1b', '1Б'),
     ('2a', '2А'),
@@ -99,7 +99,7 @@ INSERT INTO "public"."pereval_areas" ("id", "parent_id", "title") VALUES
 
 class Areas(models.Model):
     title = models.CharField('Название', max_length=255)
-    parent = models.ForeignKey(ParentAreas, on_delete=models.CASCADE)
+    parent = models.ForeignKey(ParentAreas, on_delete=models.CASCADE, blank=True, null=True)
 
     def __str__(self):
         return self.title
@@ -117,10 +117,10 @@ class Coords(models.Model):
 
 # модель уровней сложности для разных сезонов
 class Level(models.Model):
-    winter = models.CharField('Зима', choices=LEVELS, max_length=5, default='empty')
-    summer = models.CharField('Лето', choices=LEVELS, max_length=5, default='empty')
-    autumn = models.CharField('Осень', choices=LEVELS, max_length=5, default='empty')
-    spring = models.CharField('Весна', choices=LEVELS, max_length=5, default='empty')
+    winter = models.CharField('Зима', choices=LEVELS, max_length=5, default='')
+    summer = models.CharField('Лето', choices=LEVELS, max_length=5, default='')
+    autumn = models.CharField('Осень', choices=LEVELS, max_length=5, default='')
+    spring = models.CharField('Весна', choices=LEVELS, max_length=5, default='')
 
     def __str__(self):
         return f'зима: {self.winter}, лето: {self.summer}, осень: {self.autumn}, весна: {self.spring}'
@@ -150,7 +150,7 @@ class Passage(models.Model):
     level = models.ForeignKey(Level, on_delete=models.CASCADE, blank=True, null=True)
     area = models.ForeignKey(Areas, on_delete=models.CASCADE, default=1)
     status = models.CharField('Статус', max_length=8, choices=STATUSES, default='new')
-    spr_activities_types = models.CharField('На чем добраться', max_length=5, choices=ACTIVITIES, default='empty')
+    spr_activities_types = models.CharField('На чем добраться', max_length=5, choices=ACTIVITIES, default='')
 
     def __str__(self):
         return f'{self.pk}: {self.beauty_title} {self.title}'

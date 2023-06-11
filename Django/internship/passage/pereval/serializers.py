@@ -109,7 +109,7 @@ class PassageSerializer(WritableNestedModelSerializer):
 
     # переопределяем метод post
     def create(self, validated_data, **kwargs):
-        area = validated_data.pop('area')
+        area_ = validated_data.pop('area')
         user = validated_data.pop('user')
         coords = validated_data.pop('coords')
         level = validated_data.pop('level')
@@ -125,13 +125,13 @@ class PassageSerializer(WritableNestedModelSerializer):
 
         coords = Coords.objects.create(**coords)
         level = Level.objects.create(**level)
-        area = Areas.objects.create(**area)
+        area = Areas.objects.filter(title=area_['title']).first()
         passage = Passage.objects.create(**validated_data, user=user, coords=coords, level=level, area=area)
-
-        for image in images:
-            img = image.pop('img')
-            title = image.pop('title')
-            Images.objects.create(img=img, passage=passage, title=title)
+        if images:
+            for image in images:
+                img = image.pop('img')
+                title = image.pop('title')
+                Images.objects.create(img=img, passage=passage, title=title)
 
         return passage
 
