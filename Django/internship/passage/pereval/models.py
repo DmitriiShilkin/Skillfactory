@@ -9,22 +9,6 @@ STATUSES = [
     ('rejected', 'Не принят')
 ]
 
-# список способов добраться
-ACTIVITIES = [
-    ('', 'Не задано'),
-    ('1', 'пешком'),
-    ('2', 'лыжи'),
-    ('3', 'катамаран'),
-    ('4', 'байдарка'),
-    ('5', 'плот'),
-    ('6', 'сплав'),
-    ('7', 'велосипед'),
-    ('8', 'автомобиль'),
-    ('9', 'мотоцикл'),
-    ('10', 'парус'),
-    ('11', 'верхом')
-]
-
 # список уровней сложности
 LEVELS = [
     ('', 'Не задано'),
@@ -44,67 +28,6 @@ def get_image_path(instance, file):
 
 
 # Create your models here.
-'''
-модель родительских регионов (горных систем), нужно предварительно добавить в БД;
-значения брались из примера структуры БД ФСТР;
-SQL-запрос, который я выполнил для своей БД:
-INSERT INTO "public"."pereval_parentareas" ("id", "title") VALUES
-(0, 'Планета Земля'),
-(1, 'Памиро-Алай'),
-(65, 'Алтай'),
-(375, 'Тавр'),
-(384, 'Саяны');
-'''
-
-
-class ParentAreas(models.Model):
-    title = models.CharField('Название', max_length=255)
-
-    def __str__(self):
-        return self.title
-
-
-'''
-модель регионов перевалов (горных систем), перед созданием перевала нужно предварительно добавить данные в БД,
-связать их с родительскими регионами, чтобы в соответствующем поле HTML-формы был выпадающий список со
-значениями;
-значения брались из примера структуры БД ФСТР;
-SQL-запрос, который я выполнил для своей БД:
-INSERT INTO "public"."pereval_areas" ("id", "parent_id", "title") VALUES
-(1, 0, 'Не задано'),
-(66, 65, 'Северо-Чуйский хребет'),
-(88, 65, 'Южно-Чуйский хребет'),
-(92, 65, 'Катунский хребет'),
-(105, 1, 'Фанские горы'),
-(106, 1, 'Гиссарский хребет (участок западнее перевала Анзоб)'),
-(131, 1, 'Матчинский горный узел'),
-(133, 1, 'Горный узел Такали, Туркестанский хребет'),
-(137, 1, 'Высокий Алай'),
-(147, 1, 'Кичик-Алай и Восточный Алай'),
-(367, 375, 'Аладаглар'),
-(386, 65, 'Хребет Листвяга'),
-(387, 65, 'Ивановский хребет'),
-(388, 65, 'Массив Мунгун-Тайга'),
-(389, 65, 'Хребет Цаган-Шибэту'),
-(390, 65, 'Хребет Чихачева (Сайлюгем)'),
-(391, 65, 'Шапшальский хребет'),
-(392, 65, 'Хребет Южный Алтай'),
-(393, 65, 'Хребет Монгольский Алтай'),
-(398, 384, 'Западный Саян'),
-(399, 384, 'Восточный Саян'),
-(402, 384, 'Кузнецкий Алатау'),
-(459, 65, 'Курайский хребет');
-'''
-
-
-class Areas(models.Model):
-    title = models.CharField('Название', max_length=255)
-    parent = models.ForeignKey(ParentAreas, on_delete=models.CASCADE, blank=True, null=True)
-
-    def __str__(self):
-        return self.title
-
-
 # модель географических координат
 class Coords(models.Model):
     latitude = models.FloatField('Широта', max_length=32, blank=True, null=True)
@@ -140,7 +63,7 @@ class User(models.Model):
 
 # модель добавления перевала
 class Passage(models.Model):
-    date_added = models.DateField(default=timezone.now, editable=False)
+    add_time = models.DateTimeField(default=timezone.now, editable=False)
     beauty_title = models.CharField('Префикс', default='пер.', max_length=255)
     title = models.CharField('Название', max_length=255)
     other_titles = models.CharField('Другое название', max_length=255, blank=True, null=True)
@@ -148,9 +71,7 @@ class Passage(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user')
     coords = models.OneToOneField(Coords, on_delete=models.CASCADE, blank=True, null=True)
     level = models.ForeignKey(Level, on_delete=models.CASCADE, blank=True, null=True)
-    area = models.ForeignKey(Areas, on_delete=models.CASCADE, default=1)
     status = models.CharField('Статус', max_length=8, choices=STATUSES, default='new')
-    spr_activities_types = models.CharField('На чем добраться', max_length=5, choices=ACTIVITIES, default='')
 
     def __str__(self):
         return f'{self.pk}: {self.beauty_title} {self.title}'
@@ -159,9 +80,9 @@ class Passage(models.Model):
 # модель изображений перевала
 class Images(models.Model):
     title = models.CharField('Название', max_length=255, blank=True, null=True)
-    date_added = models.DateField(default=timezone.now, editable=False)
+    add_time = models.DateTimeField(default=timezone.now, editable=False)
     passage = models.ForeignKey(Passage, on_delete=models.CASCADE, related_name='images', blank=True, null=True)
-    img = models.ImageField('Изображение', upload_to=get_image_path, blank=True, null=True)
+    data = models.ImageField('Изображение', upload_to=get_image_path, blank=True, null=True)
 
     def __str__(self):
-        return f'{self.pk}: {self.title} {self.img}'
+        return f'{self.pk}: {self.title} {self.data}'

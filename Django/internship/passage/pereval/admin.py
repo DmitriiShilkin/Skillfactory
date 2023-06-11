@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Passage, Coords, Level, Images, Areas, User
+from .models import Passage, Coords, Level, Images, User
 
 
 class CoordsAdmin(admin.ModelAdmin):
@@ -16,5 +16,4 @@ admin.site.register(Passage)
 admin.site.register(Coords, CoordsAdmin)
 admin.site.register(Level, LevelAdmin)
 admin.site.register(Images)
-admin.site.register(Areas)
 admin.site.register(User)

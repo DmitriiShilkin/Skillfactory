@@ -1,9 +1,9 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 
-from .models import Passage, Coords, Level, Images, User, Areas
+from .models import Passage, Coords, Level, Images, User
 from .serializers import (PassageSerializer, LevelSerializer, CoordsSerializer, ImagesSerializer,
-                          AreasSerializer, UserSerializer)
+                          UserSerializer)
 
 
 # Create your views here.
@@ -13,10 +13,10 @@ class LevelViewSet(viewsets.ModelViewSet):
     queryset = Level.objects.all()
 
 
-# представление для регионов перевалов
-class AriasViewSet(viewsets.ModelViewSet):
-    serializer_class = AreasSerializer
-    queryset = Areas.objects.all()
+# # представление для регионов перевалов
+# class AriasViewSet(viewsets.ModelViewSet):
+#     serializer_class = AreasSerializer
+#     queryset = Areas.objects.all()
 
 
 # представление для географических координат перевала
@@ -46,6 +46,8 @@ class PassageViewSet(viewsets.ModelViewSet):
     # переопределяем метод, чтобы получить требуемые сообщения по ТЗ
     def create(self, request, *args, **kwargs):
         serializer = PassageSerializer(data=request.data)
+        print(request.data)
+        print(serializer.is_valid())
         if serializer.is_valid():
             serializer.save()
             return Response(

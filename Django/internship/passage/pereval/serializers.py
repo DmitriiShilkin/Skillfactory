@@ -1,18 +1,7 @@
 from rest_framework import serializers
 from drf_writable_nested import WritableNestedModelSerializer
 
-from .models import Passage, Areas, User, Level, Coords, Images
-
-
-# сериализатор вложенной модели регионов (горных систем), к которым относится перевал
-class AreasSerializer(serializers.ModelSerializer):
-    title = serializers.PrimaryKeyRelatedField(queryset=Areas.objects.all(), label='Принадлежность')
-
-    class Meta:
-        model = Areas
-        fields = [
-            'title',
-        ]
+from .models import Passage, User, Level, Coords, Images
 
 
 # сериализатор вложенной модели уровней сложности перевала
@@ -46,11 +35,11 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
+            'email',
             'fam',
             'name',
             'otc',
             'phone',
-            'email',
         ]
 
     def save(self, **kwargs):
@@ -71,19 +60,19 @@ class UserSerializer(serializers.ModelSerializer):
 
 # сериализатор модели фотографий, прикрепляемых к перевалу
 class ImagesSerializer(serializers.ModelSerializer):
-    img = serializers.URLField(label='URL')
+    data = serializers.URLField(label='URL')
 
     class Meta:
         model = Images
         fields = [
+            'data',
             'title',
-            'img',
         ]
 
 
 # сериализатор модели самого перевала
 class PassageSerializer(WritableNestedModelSerializer):
-    area = AreasSerializer()
+    # area = AreasSerializer()
     coords = CoordsSerializer()
     level = LevelSerializer()
     user = UserSerializer()
@@ -98,18 +87,15 @@ class PassageSerializer(WritableNestedModelSerializer):
             'title',
             'other_titles',
             'connect',
-            'area',
+            'user',
             'coords',
             'level',
-            'spr_activities_types',
-            'status',
             'images',
-            'user',
-         ]
+            'status',
+        ]
 
     # переопределяем метод post
     def create(self, validated_data, **kwargs):
-        area_ = validated_data.pop('area')
         user = validated_data.pop('user')
         coords = validated_data.pop('coords')
         level = validated_data.pop('level')
@@ -125,13 +111,12 @@ class PassageSerializer(WritableNestedModelSerializer):
 
         coords = Coords.objects.create(**coords)
         level = Level.objects.create(**level)
-        area = Areas.objects.filter(title=area_['title']).first()
-        passage = Passage.objects.create(**validated_data, user=user, coords=coords, level=level, area=area)
+        passage = Passage.objects.create(**validated_data, user=user, coords=coords, level=level)
         if images:
             for image in images:
-                img = image.pop('img')
+                data = image.pop('data')
                 title = image.pop('title')
-                Images.objects.create(img=img, passage=passage, title=title)
+                Images.objects.create(data=data, passage=passage, title=title)
 
         return passage
 
