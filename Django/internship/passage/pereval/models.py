@@ -51,7 +51,7 @@ class Level(models.Model):
 
 # модель пользователя
 class User(models.Model):
-    email = models.EmailField('Email', max_length=128)
+    email = models.EmailField('Email', max_length=128, unique=True)
     phone = models.CharField('Телефон', max_length=12)
     fam = models.CharField('Фамилия', max_length=64)
     name = models.CharField('Имя', max_length=64)
