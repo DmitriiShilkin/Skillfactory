@@ -13,12 +13,6 @@ class LevelViewSet(viewsets.ModelViewSet):
     queryset = Level.objects.all()
 
 
-# # представление для регионов перевалов
-# class AriasViewSet(viewsets.ModelViewSet):
-#     serializer_class = AreasSerializer
-#     queryset = Areas.objects.all()
-
-
 # представление для географических координат перевала
 class CoordsViewSet(viewsets.ModelViewSet):
     serializer_class = CoordsSerializer
@@ -46,7 +40,6 @@ class PassageViewSet(viewsets.ModelViewSet):
     # переопределяем метод, чтобы получить требуемые сообщения по ТЗ
     def create(self, request, *args, **kwargs):
         serializer = PassageSerializer(data=request.data)
-        print(request.data)
         print(serializer.is_valid())
         if serializer.is_valid():
             serializer.save()
@@ -71,5 +64,34 @@ class PassageViewSet(viewsets.ModelViewSet):
                     'status': status.HTTP_500_INTERNAL_SERVER_ERROR,
                     'message': 'Ошибка при выполнении операции',
                     'id': None
+                }
+            )
+
+    # даем возможность частично изменять перевал
+    def partial_update(self, request, *args, **kwargs):
+        passage = self.get_object()
+        if passage.status == 'new':
+            serializer = PassageSerializer(passage, data=request.data, partial=True)
+            print(serializer.is_valid())
+            if serializer.is_valid():
+                serializer.save()
+                return Response(
+                    {
+                        'state': '1',
+                        'message': 'Изменения успешно внесены'
+                    }
+                )
+            else:
+                return Response(
+                    {
+                        'state': '0',
+                        'message': serializer.errors
+                    }
+                )
+        else:
+            return Response(
+                {
+                    'state': '0',
+                    'message': f'Текущий статус: {passage.get_status_display()}, данные не могут быть изменены!'
                 }
             )
