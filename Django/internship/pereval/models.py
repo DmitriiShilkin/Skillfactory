@@ -4,7 +4,7 @@ from django.utils import timezone
 # список возможных значений статуса для добавления перевала
 STATUSES = [
     ('new', 'Новый'),
-    ('pending ', 'Модерируется'),
+    ('pending', 'Модерируется'),
     ('accepted', 'Принят'),
     ('rejected', 'Не принят')
 ]
