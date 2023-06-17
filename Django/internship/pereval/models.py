@@ -4,7 +4,7 @@ from django.utils import timezone
 # список возможных значений статуса для добавления перевала
 STATUSES = [
     ('new', 'Новый'),
-    ('pending ', 'Модерируется'),
+    ('pending', 'Модерируется'),
     ('accepted', 'Принят'),
     ('rejected', 'Не принят')
 ]
@@ -51,7 +51,7 @@ class Level(models.Model):
 
 # модель пользователя
 class User(models.Model):
-    email = models.EmailField('Email', max_length=128, unique=True)
+    email = models.EmailField('Email', max_length=128)
     phone = models.CharField('Телефон', max_length=12)
     fam = models.CharField('Фамилия', max_length=64)
     name = models.CharField('Имя', max_length=64)
