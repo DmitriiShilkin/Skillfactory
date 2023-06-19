@@ -1,6 +1,6 @@
 <h2 align="center">Виртуальная стажировка</h2>
 
-<h3 align="center">Passage Rest API</h3>
+<h3 align="center">Passage REST API</h3>
 
 <p align="justify">Федерации спортивного туризма России <a href="https://pereval.online">pereval.online</a>
 (далее - ФСТР) заказала студентам SkillFactory разработать мобильное приложение для Android и IOS, которое упростило бы
@@ -187,9 +187,24 @@ GET /api/submitData/?user_id__email=<email>
 
 Проект опубликован на хостинге pythonanywhere.com:
 
-<a href="https://dmitriishilkin.pythonanywhere.com/api/submitData/">API Passage</a>
+<a href="https://dmitriishilkin.pythonanywhere.com/api/submitData/">Passage REST API</a>
 
-<a href="https://dmitriishilkin.pythonanywhere.com/swagger-ui/">Документация swagger</a>
+<a href="https://dmitriishilkin.pythonanywhere.com/swagger-ui/">Документация Swagger</a>
 
 <hr>
 
+<p><b>Отчет о выполнении тестов</b>:<br>
+
+Found 7 test(s).<br>
+Creating test database for alias 'default'...<br>
+System check identified no issues (0 silenced).<br>
+False<br>
+....False<br>
+.True<br>
+.True<br>
+.<br>
+----------------------------------------------------------------------<br>
+Ran 7 tests in 0.106s<br>
+<br>
+OK<br>
+Destroying test database for alias 'default'...</p>

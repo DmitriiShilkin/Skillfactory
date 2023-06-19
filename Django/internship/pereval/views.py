@@ -35,7 +35,10 @@ class UserViewSet(viewsets.ModelViewSet):
 class PassageViewSet(viewsets.ModelViewSet):
     serializer_class = PassageSerializer
     queryset = Passage.objects.all()
+    # добавляем фильтрацию записей по email пользователя
     filterset_fields = ('user__email',)
+    # разрешаем только перечисленные методы
+    http_method_names = ['get', 'post', 'head', 'patch', 'options']
 
     # переопределяем метод, чтобы получить требуемые сообщения по ТЗ
     def create(self, request, *args, **kwargs):
