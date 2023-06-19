@@ -113,7 +113,7 @@ POST /api/submitData/
 Примеры oтветов:
 
 ```
-{ "status": 200, "message": "Успех, "id": 5 }`
+{ "status": 200, "message": "Успех, "id": 5 }
 { "status": 500, "message": "Ошибка при выполнении операции","id": null}
 ```
 
