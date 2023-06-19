@@ -6,7 +6,7 @@ from rest_framework import routers
 from .views import PassageViewSet
 
 router = routers.DefaultRouter()
-router.register(r'submitData', PassageViewSet)
+router.register(r'submitData', PassageViewSet, basename='passage')
 
 urlpatterns = [
     path('', include(router.urls)),
